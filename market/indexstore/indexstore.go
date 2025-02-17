@@ -81,6 +81,13 @@ func NewIndexStore(hosts []string, cfg *config.CurioConfig) (*IndexStore, error)
 	cluster.Consistency = gocql.One
 	cluster.NumConns = cfg.Market.StorageMarketConfig.Indexing.InsertConcurrency * 8
 
+	if len(hosts) == 1 {
+		cluster.DisableInitialHostLookup = false
+		cluster.PoolConfig = gocql.PoolConfig{
+			HostSelectionPolicy: gocql.SingleHostReadyPolicy(gocql.RoundRobinHostPolicy()),
+		}
+	}
+
 	store := &IndexStore{
 		cluster: cluster,
 		settings: settings{

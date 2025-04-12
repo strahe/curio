@@ -137,7 +137,7 @@ debug: build
 2k: CURIO_TAGS+= 2k
 2k: build
 
-all: build 
+all: build
 .PHONY: all
 
 build: curio sptool
@@ -231,7 +231,7 @@ docsgen-openrpc: docsgen-openrpc-curio
 	@echo "FixImports will run only from the 'make gen' target"
 .PHONY: docsgen-openrpc
 
-docsgen-openrpc-bin: api-gen 
+docsgen-openrpc-bin: api-gen
 	$(GOCC) build $(GOFLAGS) -o docgen-openrpc ./api/docgen-openrpc/cmd
 
 docsgen-openrpc-curio: docsgen-openrpc-bin
@@ -267,10 +267,10 @@ forest-test: buildall
 
 ##################### Curio devnet images ##################
 build_lotus?=0
-curio_docker_user?=curio
-curio_base_image=$(curio_docker_user)/curio-all-in-one:latest-debug
+curio_docker_user?=ghcr.io/strahe
+curio_base_image=$(curio_docker_user)/curio:latest-debug
 ffi_from_source?=0
-lotus_version?=v1.32.1
+lotus_version?=v1.32.2
 
 ifeq ($(build_lotus),1)
 # v1: building lotus image with provided lotus version

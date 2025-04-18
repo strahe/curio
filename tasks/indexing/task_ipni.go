@@ -367,7 +367,6 @@ func (I *IPNITask) schedule(ctx context.Context, taskFunc harmonytask.AddTaskFun
 											announce
 											FROM market_mk12_deal_pipeline 
 											WHERE sealed = TRUE
-											AND indexed = TRUE 
 											AND complete = FALSE
 											ORDER BY indexing_created_at ASC
 											LIMIT 1;`)

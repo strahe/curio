@@ -663,6 +663,12 @@ type ApisConfig struct {
 
 	// API auth secret for the Curio nodes to use. This value should only be set on the bade layer.
 	StorageRPCSecret string
+
+	// Enable or disable the WebAuth integration.
+	EnableWebAuth bool
+
+	// API auth secret for the web nodes to use.
+	WebRPCSecret string
 }
 
 type CurioBatchingConfig struct {

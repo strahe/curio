@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"context"
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/fs"
@@ -17,13 +18,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	logging "github.com/ipfs/go-log/v2"
 	"go.opencensus.io/tag"
+	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/curio/deps"
 	"github.com/filecoin-project/curio/web/api"
+	"github.com/filecoin-project/go-jsonrpc/auth"
 
 	"github.com/filecoin-project/lotus/metrics"
 )
@@ -42,7 +46,11 @@ var webDev = os.Getenv("CURIO_WEB_DEV") == "1"
 func GetSrv(ctx context.Context, deps *deps.Deps, devMode bool) (*http.Server, error) {
 	mx := mux.NewRouter()
 	if !devMode {
-		api.Routes(mx.PathPrefix("/api").Subrouter(), deps, webDev)
+		authverify, err := getAuthVerify(deps)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get auth verify: %v", err)
+		}
+		api.Routes(mx.PathPrefix("/api").Subrouter(), deps, authverify, webDev)
 	} else {
 		if err := setupDevModeProxy(mx); err != nil {
 			return nil, fmt.Errorf("failed to setup dev mode proxy: %v", err)
@@ -271,4 +279,19 @@ func proxyCopy(dst, src *websocket.Conn, errc chan<- error, direction string) {
 			return
 		}
 	}
+}
+
+func getAuthVerify(deps1 *deps.Deps) (func(context.Context, string) ([]auth.Permission, error), error) {
+	privateKey, err := base64.StdEncoding.DecodeString(deps1.Cfg.Apis.WebRPCSecret)
+	if err != nil {
+		return nil, xerrors.Errorf("decoding webrpc secret: %w", err)
+	}
+	authVerify := func(ctx context.Context, token string) ([]auth.Permission, error) {
+		var payload deps.JwtPayload
+		if _, err := jwt.Verify([]byte(token), jwt.NewHS256(privateKey), &payload); err != nil {
+			return nil, xerrors.Errorf("JWT Verification failed: %w", err)
+		}
+		return payload.Allow, nil
+	}
+	return authVerify, nil
 }

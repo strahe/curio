@@ -46,6 +46,11 @@ func GetSrv(ctx context.Context, deps *deps.Deps, devMode bool) (*http.Server, e
 	// Add CORS middleware if origins are configured
 	if len(deps.Cfg.HTTP.CORSOrigins) > 0 {
 		mx.Use(handlers.CORS(handlers.AllowedOrigins(deps.Cfg.HTTP.CORSOrigins)))
+		mx.Methods(http.MethodOptions).PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Register OPTIONS routes for CORS preflight requests.
+			// Actual handling is done by corsMiddleware which intercepts
+			// all OPTIONS requests before they reach this handler.
+		})
 	}
 
 	if !devMode {

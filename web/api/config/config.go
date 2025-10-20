@@ -29,6 +29,7 @@ type cfg struct {
 func Routes(r *mux.Router, deps *deps.Deps) {
 	c := &cfg{deps}
 	// At menu.html:
+	r.Methods(http.MethodOptions).PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	r.Methods("GET").Path("/layers").HandlerFunc(c.getLayers)
 	r.Methods("GET").Path("/topo").HandlerFunc(c.topo)
 

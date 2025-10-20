@@ -55,6 +55,7 @@ type sec struct {
 func Routes(r *mux.Router, deps *deps.Deps) {
 	c := &cfg{deps}
 	// At menu.html:
+	r.Methods(http.MethodOptions).PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	r.Methods("GET").Path("/all").HandlerFunc(c.getSectors)
 	r.Methods("POST").Path("/terminate").HandlerFunc(c.terminateSectors)
 }

@@ -50,7 +50,7 @@ ARG CURIO_TAGS=""
 RUN make build
 
 ####################################
-FROM golang:1.24-bullseye AS piece-server-builder
+FROM golang:1.25-trixie AS piece-server-builder
 
 RUN go install github.com/ipld/go-car/cmd/car@latest \
  && cp $GOPATH/bin/car /usr/local/bin/

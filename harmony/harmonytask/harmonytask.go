@@ -180,9 +180,18 @@ func New(
 	}
 	e.lastCleanup.Store(time.Now())
 	for _, c := range impls {
+		details := c.TypeDetails()
+		if maxRamStr := os.Getenv("CURIO_MAX_RAM_PER_TASK"); maxRamStr != "" {
+			if maxRam, err := strconv.ParseUint(maxRamStr, 10, 64); err == nil {
+				if details.Cost.Ram > maxRam {
+					details.Cost.Ram = maxRam
+				}
+			}
+		}
+
 		h := taskTypeHandler{
 			TaskInterface:   c,
-			TaskTypeDetails: c.TypeDetails(),
+			TaskTypeDetails: details,
 			TaskEngine:      e,
 		}
 		if h.Max == nil {
